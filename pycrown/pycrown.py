@@ -767,6 +767,16 @@ class PyCrown:
             print(f'COM correction: {corr_com}')
         return corr_dsm, corr_com
 
+    def screen_small_trees_area(self, area_min=2):
+        cond = self.trees['area'] >= area_min
+        
+        self.trees = self.trees[cond]
+
+        if isinstance(self.crowns, np.ndarray):
+            self._screen_crowns(cond)
+
+        self._check_empty()
+        
     def screen_small_trees(self, hmin=20., loc='top'):
         """ Remove small trees from index based on minimum threshold.
         Tree dataframe and crowns raster is updated.
@@ -801,6 +811,10 @@ class PyCrown:
             # poly_smooth = self.smooth_poly(Polygon(edges), s=None, k=9)
             polys.append(Polygon(edges))
         self.trees.crown_poly_raster = polys
+        
+        #add area size
+        self.trees['area'] = self.trees.apply(lambda x: x.crown_poly_raster.area, axis=1)
+            
 
     def crowns_to_polys_smooth(self, store_las=True, thin_perc=None,
                                first_return=True):
@@ -964,7 +978,8 @@ class PyCrown:
 
         schema = {
             'geometry': 'Polygon',
-            'properties': {'DN': 'int', 'TTH': 'float', 'TCH': 'float'}
+            'properties': {'DN': 'int', 'TTH': 'float', 'TCH': 'float', 
+                          'area': 'float'}
         }
         with fiona.collection(
             str(outfile), 'w', 'ESRI Shapefile',
@@ -977,7 +992,8 @@ class PyCrown:
                 feat['properties'] = {
                     'DN': tidx,
                     'TTH': float(tree.top_height),
-                    'TCH': float(tree.top_cor_height)
+                    'TCH': float(tree.top_cor_height),
+                    'area': float(tree.area)
                 }
                 output.write(feat)
 
