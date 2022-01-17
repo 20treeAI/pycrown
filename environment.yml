@@ -1,4 +1,4 @@
-name: pycrown-env
+name: pycrown
 channels:
   - conda
 dependencies:
@@ -18,3 +18,9 @@ dependencies:
   - rasterio>=0.36.0
   - pip:
     - laspy==1.5.1
+    - dagster-postgres~=0.13.14
+    - dagster-k8s~=0.13.14
+    - dagster-gcp~=0.13.14
+    - dagster-shell~=0.13.14
+    - dagster~=0.13.14
+    - dagit~=0.13.14
