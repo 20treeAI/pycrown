@@ -5,7 +5,9 @@ from pycrown.ops.gcs import download_blob, upload_blob
 
 @op
 def run(bucket, chm_name, height_min, outbucket=None, outpoints=None, outsegments=None, return_PC=False,
-        dsm_name=None, dtm_name=None, point_cloud_name=None):
+        dsm_name=None, dtm_name=None, point_cloud_name=None, median_filter_size: int=5,
+        tree_detection_window_size: int=5, max_crown: float=10., algorithm: str="dalponteCIRC_numba",
+        th_crown: float=0.55, th_seed: float=0.7, area_min: int=2):
     from pycrown import PyCrown
     import geopandas as gpd
 
@@ -41,12 +43,12 @@ def run(bucket, chm_name, height_min, outbucket=None, outpoints=None, outsegment
 
     PC = PyCrown(F_CHM, F_DTM, F_DSM, las_file=F_LAS, outpath='./')
 
-    PC.filter_chm(5, ws_in_pixels=True, circular=False)
-    PC.tree_detection(PC.chm, ws=5, hmin=height_min)
+    PC.filter_chm(median_filter_size, ws_in_pixels=True, circular=False)
+    PC.tree_detection(PC.chm, ws=tree_detection_window_size, hmin=height_min)
 
     #crown delineation algorithms: ['dalponte_cython', 'dalponte_numba','dalponteCIRC_numba', 'watershed_skimage']
-    PC.crown_delineation(algorithm='dalponteCIRC_numba', th_tree=15.,
-                     th_seed=0.7, th_crown=0.55, max_crown=10.)
+    PC.crown_delineation(algorithm=algorithm, th_tree=height_min,
+                     th_seed=th_seed, th_crown=th_crown, max_crown=max_crown)
     print(f"Number of trees detected: {len(PC.trees)}")
     PC.correct_tree_tops()
     PC.get_tree_height_elevation(loc='top')
@@ -61,7 +63,7 @@ def run(bucket, chm_name, height_min, outbucket=None, outpoints=None, outsegment
     if point_cloud_name is not None:
         PC.crowns_to_polys_smooth(store_las=True)
 
-    PC.screen_small_trees_area(area_min=2)
+    PC.screen_small_trees_area(area_min=area_min)
     PC.quality_control()
     print(f"Final number of trees detected: {len(PC.trees)}")
 

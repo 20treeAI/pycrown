@@ -21,10 +21,12 @@ from pycrown.ops import treecrown
 
 @graph
 def pycown_run(bucket, chmpath, chmout, height_min, outbucket, outpath_points, outpath_segments, dsm_name,
-               dtm_name, point_cloud_name):
+               dtm_name, point_cloud_name, median_filter_size, tree_detection_window_size, max_crown, algorithm,
+               th_crown, th_seed, area_min):
 
     treecrown.download_blob(bucket, chmpath, chmout)
-    treecrown.run(chmout, height_min, outbucket, outpath_points, outpath_segments, dsm_name, dtm_name, point_cloud_name)
+    treecrown.run(chmout, height_min, outbucket, outpath_points, outpath_segments, dsm_name, dtm_name, point_cloud_name,
+                  median_filter_size, tree_detection_window_size, max_crown, algorithm, th_crown, th_seed, area_min)
 
 
 
