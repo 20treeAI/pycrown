@@ -4,19 +4,42 @@ from pycrown.ops.gcs import download_blob, upload_blob
 
 
 @op
-def run(bucket, chm_name, height_min, outbucket=None, outpoints=None, outsegments=None, return_PC=False):
+def run(bucket, chm_name, height_min, outbucket=None, outpoints=None, outsegments=None, return_PC=False,
+        dsm_name=None, dtm_name=None, point_cloud_name=None):
     from pycrown import PyCrown
     import geopandas as gpd
 
     chm = chm_name.split('/')[-1]
     download_blob(bucket,chm_name,chm)
 
-    #tree crown can work with CHM, DTM, DSM but here we just use the CHM for everything
+    # Use DTM, DSM and LAS in processing if provided, otherwise use the CHM for all.
     F_CHM = chm
-    F_DTM = chm
-    F_DSM = chm
 
-    PC = PyCrown(F_CHM, F_DTM, F_DSM, outpath='./')
+    # Set DSM to CHM if not provided, otherwise we can use DSM for a better result.
+    if dsm_name is not None:
+        dsm = dsm_name.split('/')[-1]
+        download_blob(bucket, dsm_name, dsm)
+        F_DSM = dsm
+    else:
+        F_DSM = chm
+
+    # Set DTM to CHM if not provided, otherwise we can use DTM for a better result.
+    if dtm_name is not None:
+        dtm = dtm_name.split('/')[-1]
+        download_blob(bucket, dtm_name, dtm)
+        F_DTM = dtm
+    else:
+        F_DTM = chm
+
+    # Load .las file if provided.
+    if point_cloud_name is not None:
+        las = point_cloud_name.split('/')[-1]
+        download_blob(bucket, point_cloud_name, las)
+        F_LAS = las
+    else:
+        F_LAS = None
+
+    PC = PyCrown(F_CHM, F_DTM, F_DSM, las_file=F_LAS, outpath='./')
 
     PC.filter_chm(5, ws_in_pixels=True, circular=False)
     PC.tree_detection(PC.chm, ws=5, hmin=height_min)
@@ -35,6 +58,9 @@ def run(bucket, chm_name, height_min, outbucket=None, outpoints=None, outsegment
     #also adds area size per tree
     PC.crowns_to_polys_raster()
 
+    if point_cloud_name is not None:
+        PC.crowns_to_polys_smooth(store_las=True)
+
     PC.screen_small_trees_area(area_min=2)
     PC.quality_control()
     print(f"Final number of trees detected: {len(PC.trees)}")
@@ -42,6 +68,9 @@ def run(bucket, chm_name, height_min, outbucket=None, outpoints=None, outsegment
     PC.export_tree_locations(loc='top')
     PC.export_tree_locations(loc='top_cor')
     PC.export_tree_crowns(crowntype='crown_poly_raster')
+
+    if point_cloud_name is not None:
+        PC.export_tree_crowns(crowntype='crown_poly_smooth')
 
     #we want geojson
     df_crown_poly = gpd.read_file('tree_crown_poly_raster.shp')
