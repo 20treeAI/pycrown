@@ -156,3 +156,23 @@ You can also run the example python script directly. Results are stored in the *
 ### Step 6: Classification of individual trees in the 3D point cloud (visualized with CloudCompare)
 ![Classified Point Cloud](example/step_6a.jpg)
 ![Classified Point Cloud](example/step_6b.jpg)
+
+### Input parameters:
+bucket: The bucket the input data is stored in.
+chm_name: The relative path inside of the bucket to the CHM.
+height_min: The minimum height of what can be considered a tree, anything below this is filtered out.
+outbucket: The bucket to output the tree top points and/or canopy segmentation into.
+outpoints: Relative path to save the tree top points to in the outbucket.
+outsegments: Relative path to save the tree canopy segmentation to in the outbucket.
+return_PC: If True, returns the PyCrown object.
+dsm_name: The relative path inside of the bucket to the DSM, optional.
+dtm_name: The relative path inside of the bucket to the DTM, optional.
+point_cloud_name: The relative path inside of the bucket to the point cloud, optional.
+median_filter_size: The size of the median filter, a smaller number may allow more trees to be picked up at the cost of more false positives. Default=5.
+tree_detection_window_size: The size of the window used to detect trees. Default=5.
+max_crown: The maximum radius of each tree crown in metres. Default=10.
+algorithm: The crown delineation algorithm to use. Choose from: ['dalponte_cython', 'dalponte_numba', 'dalponteCIRC_numba', 'watershed_skimage']
+th_crown: Factor 2 for the minimum height of the tree crown.
+th_seed: Factor 1 for the minimum height of the tree crown.
+area_min: The minimum area of what can be considered a tree, anything below this is filtered out.
+
