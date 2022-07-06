@@ -81,12 +81,12 @@ values_resource = make_values_resource(
     th_crown=Field(
         float,
         default_value=0.55,
-        description="The size of the window used to detect trees. Default=0.55",
+        description="Factor 2 for the minimum height of the tree crown. Default=0.55",
     ),
     th_seed=Field(
         float,
         default_value=0.7,
-        description="The size of the window used to detect trees. Default=0.7",
+        description="Factor 1 for the minimum height of the tree crown. Default=0.7",
     ),
     area_min=Field(
         int,
@@ -96,7 +96,8 @@ values_resource = make_values_resource(
     max_crown=Field(
         float,
         default_value=10.,
-        description="The maximum size of a tree crown, in pixels.",
+        description="The minimum area of what can be considered a tree, anything below this is filtered out, in pixels."
+                    " Default=10.",
     ),
 )
 def pycrown_parameters(init_context):
