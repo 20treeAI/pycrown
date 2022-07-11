@@ -506,7 +506,7 @@ class PyCrown:
 
         resolution = resolution if resolution else self.resolution
 
-        if not ws_in_pixels:
+        if ws_in_pixels is False:
             if ws % resolution:
                 raise Exception("Image filter size not an integer number. Please check if image resolution matches filter size (in metre or pixel).")
             else:
@@ -829,7 +829,7 @@ class PyCrown:
         store_las :    bool
                        set to True if LiDAR point clouds shopuld be classified
                        and stored externally
-        thin_perc :    None or int
+        thin_perc :    None or float (between 0 and 1)
                        percentage amount by how much the point cloud should be
                        thinned out randomly
         first_return : bool
@@ -985,7 +985,10 @@ class PyCrown:
             str(outfile), 'w', 'ESRI Shapefile',
             schema, crs=self.srs
         ) as output:
+            print(self.trees, type(self.trees))
             for tidx in range(len(self.trees)):
+                for i in self.trees.iloc[tidx]:
+                    print(i)
                 feat = {}
                 tree = self.trees.iloc[tidx]
                 feat['geometry'] = mapping(tree[crowntype])
@@ -996,6 +999,9 @@ class PyCrown:
                     'area': float(tree.area)
                 }
                 output.write(feat)
+
+
+
 
     def export_raster(self, raster, fname, title, res=None):
         """ Write array to raster file with gdal

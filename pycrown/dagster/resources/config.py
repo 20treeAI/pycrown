@@ -61,7 +61,7 @@ values_resource = make_values_resource(
     tree_detection_window_size=Field(
         int,
         default_value=5,
-        description="The size of the window used to detect trees. Default=5.",
+        description="The size of the window used to detect trees. Default=5",
     ),
     algorithm=Field(
         Enum(
