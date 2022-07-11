@@ -1,5 +1,7 @@
+import geopandas as gpd
 from dagster import op
 
+from pycrown import PyCrown
 from pycrown.dagster.ops.gcs import download_blob, upload_blob
 
 
@@ -7,8 +9,6 @@ from pycrown.dagster.ops.gcs import download_blob, upload_blob
     "inputs"
 })
 def run(context):
-    from pycrown import PyCrown
-    import geopandas as gpd
 
     chm = context.resources.inputs["chm_name"].split('/')[-1]
     download_blob(context.resources.inputs["bucket"], context.resources.inputs["chm_name"],chm)
@@ -52,7 +52,6 @@ def run(context):
                          max_crown=context.resources.inputs["max_crown"])
     print(f"Number of trees detected: {len(PC.trees)}")
 
-    # if context.resources.inputs["point_cloud_name"] is not None:
     PC.correct_tree_tops()
 
     PC.get_tree_height_elevation(loc='top')
@@ -78,7 +77,7 @@ def run(context):
     if context.resources.inputs["point_cloud_name"] is not None:
         PC.export_tree_crowns(crowntype='crown_poly_smooth')
 
-    #we want geojson
+    # TODO: we want geojson
     df_crown_poly = gpd.read_file('tree_crown_poly_raster.shp')
     df_crown_top_points = gpd.read_file('tree_location_top_cor.shp')
 
