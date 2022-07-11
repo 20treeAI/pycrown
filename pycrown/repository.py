@@ -1,6 +1,6 @@
 from dagster import repository
 
-from pycrown.graphs.jobs import pycrown_run_job
+from pycrown.dagster.graphs.jobs import pycrown_run_job
 
 
 @repository

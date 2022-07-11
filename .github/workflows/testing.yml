@@ -1,0 +1,49 @@
+# name: Testing
+
+# on:
+#   push:
+
+# jobs:
+#   setting-up:
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         shell: bash -l {0}
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.9'
+#       - uses: conda-incubator/setup-miniconda@v2
+#         with:
+#           environment-file: environment.yml
+#           activate-environment: pycrown
+#       - name: Setup SSH Keys and known_hosts
+#         env:
+#           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+#         run: |
+#           mkdir -p ~/.ssh
+#           ssh-keyscan github.com >> ~/.ssh/known_hosts
+#           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+#           ssh-add - <<< "${{ secrets.OVERSTORY_BOT_SSH_KEY }}"
+#       - name: Import GCS key
+#         run: 'echo "$GCS_RO_SERVICEACCOUNT_KEY" | base64 -d > /tmp/gcloud_key.json'
+#         env:
+#           GCS_RO_SERVICEACCOUNT_KEY: ${{secrets.GCS_RO_SERVICEACCOUNT_KEY}}
+#       - name: Install lib & Run tests
+#         env:
+#           GOOGLE_APPLICATION_CREDENTIALS: '/tmp/gcloud_key.json'
+#           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+#         run: |
+#           # Install gdal through conda-forge using the version specified in Dockerfile
+#           echo "Installing library"
+#           conda install -c conda-forge gdal=$(head -n1 Dockerfile | cut -f3 -d'-')
+#           pip3 install -e .
+#           # # Verify formatting
+#           # echo "Running black"
+#           # black risk_score tests -l 88 --check --diff
+#           # echo "Running flake8"
+#           # flake8 risk_score tests --max-line-length 88 --max-doc-length 120 --extend-ignore E203
+#           # Run tests
+#           echo "Running pytest"
+#           pytest
