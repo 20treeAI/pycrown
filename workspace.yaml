@@ -1,2 +1,2 @@
 load_from:
-  - python_package: pycrown
+  - python_file: pycrown/repository.py
