@@ -1,14 +1,23 @@
-name: manaakiwhenua-standards
+name: Build and push Docker images for Dagster
 
-on: [push]
-
+on:
+  pull_request: # Builds image and only creates a development environment if PR has `dev-env` tag set.
+    types: [labeled, unlabeled, opened, synchronize, reopened, closed]
+    branches:
+      - master
+  push:
+    branches: # Build image, push tags latest/stage, deploy to stage
+      - master
+    tags: # Build image, push tags v0.X/prod, deploy to prod
+      - '*'
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name : 'Checkout'
-        uses : 'actions/checkout@v2'
-      - name : 'manaakiwhenua-standards'
-        uses : manaakiwhenua/manaakiwhenua-standards@v0.1.1
+  run-dagster-ci:
+    uses: 20treeAI/github-workflows/.github/workflows/dagster.yml@master
+    with:
+      image_name: pycrown
+      branch: master
+      gcp_project: tree-266510
+      cluster_name: elm
+    secrets:
+      SSH_KEY: ${{ secrets.OVERSTORY_BOT_SSH_KEY }}
+      GCR_RW_SERVICEACCOUNT_KEY: ${{ secrets.GCR_RW_SERVICEACCOUNT_KEY }}
